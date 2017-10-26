@@ -2,16 +2,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-//#include "lecteur_redacteur.h"
 
-pthread_cond_t file_lect = PTHREAD_COND_INITIALIZER;
-pthread_cond_t file_rect = PTHREAD_COND_INITIALIZER;
+typedef struct{
+    pthread_t tid;
+    struct * next_maillon;
+}maillon_t;
 
 typedef struct{
     pthread_mutex_t mutex_global;
     int nb_lecteurs;
     int nb_redacteurs;
-    int bool_redacteur;
+    maillon * tête;
+    maillon * queue;
+
 }lecteur_redacteur_t;
 
 typedef struct {
@@ -20,61 +23,38 @@ typedef struct {
     int donnee;
 } donnees_thread_t;
 
+void ajouter_Queue(pthread_t tid,lecteur_redacteur lect_red){
+    if(lect_red->queue !=NULL){
+        maillon_t * new_maillon = malloc(sizeof(maillon_t));
+        new_maillon->tid = tid;
+        new_maillon->next_maillon = NULL;
+        lect_red->queue->next_maillon = new_maillon;
+        lect_red->queue = new_maillon;
+    }
+}
 
 void debut_redaction(lecteur_redacteur_t *lect_red){
-    pthread_mutex_lock(&lect_red->mutex_global);
-    lect_red->nb_redacteurs++;
 
-    while(lect_red->bool_redacteur || lect_red->nb_lecteurs> 0)
-        pthread_cond_wait(&file_rect,&lect_red->mutex_global);
-
-    lect_red->bool_redacteur = 1;
-    pthread_mutex_unlock(&lect_red->mutex_global);
 }
 void fin_redaction(lecteur_redacteur_t *lect_red){
-    pthread_mutex_lock(&lect_red->mutex_global);
-    lect_red->nb_redacteurs--;
-    lect_red->bool_redacteur = 0;
 
-    if(lect_red->nb_redacteurs > 0)
-        pthread_cond_signal(&file_rect);
-    else
-        pthread_cond_broadcast(&file_lect);
-
-    pthread_mutex_unlock(&lect_red->mutex_global);
 
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
-    pthread_mutex_lock(&lect_red->mutex_global);
 
-    while(lect_red->nb_redacteurs > 0)
-        pthread_cond_wait(&file_lect,&lect_red->mutex_global);
-
-    lect_red->nb_lecteurs++;
-    pthread_mutex_unlock(&lect_red->mutex_global);
 }
 
 void fin_lecture(lecteur_redacteur_t *lect_red){
-    pthread_mutex_lock(&lect_red->mutex_global);
-    lect_red->nb_lecteurs--;
-    if(lect_red->nb_lecteurs == 0)
-        pthread_cond_signal(&file_rect);
-    pthread_mutex_unlock(&lect_red->mutex_global);
+
 }
 
 void initialiser_lecteur_redacteur(lecteur_redacteur_t *lect_red){
-    lect_red->nb_lecteurs = 0;
-    lect_red->nb_redacteurs = 0;
-    lect_red->bool_redacteur =0;
-    pthread_mutex_init(&lect_red->mutex_global,NULL);
-    pthread_cond_init(&file_lect,NULL);
-    pthread_cond_init(&file_rect,NULL);
+
 }
 
 void detruire_lecteur_redacteur(lecteur_redacteur_t *lect_red){
     pthread_mutex_destroy(&lect_red->mutex_global);
-    pthread_cond_destroy(&file_lect);
-    pthread_cond_destroy(&file_rect);
+
 }
 
 void dodo(int scale) {
