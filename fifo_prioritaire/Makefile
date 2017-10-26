@@ -5,4 +5,4 @@ LDLIBS=-lpthread
 all: test_lecteurs_redacteurs
 
 clean:
-$(RM) test_lecteurs_redacteurs *.o
+	$(RM) test_lecteurs_redacteurs *.o

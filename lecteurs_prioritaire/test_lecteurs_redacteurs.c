@@ -8,6 +8,9 @@ typedef struct{
     pthread_mutex_t mutex_global;
     int nb_lecteurs;
     int nb_redacteurs;
+    int bool_redacteur;
+    pthread_cond_t file_lect;
+    pthread_cond_t file_rect;
 }lecteur_redacteur_t;
 
 typedef struct {
@@ -16,25 +19,61 @@ typedef struct {
     int donnee;
 } donnees_thread_t;
 
+void debut_redaction(lecteur_redacteur_t *lect_red){
+    pthread_mutex_lock(&lect_red->mutex_global);
+    lect_red->nb_redacteurs++;
 
-void debut_redaction()
-{
-    lock(global);
-    nb_lecteurs++;
+    while(lect_red->bool_redacteur || lect_red->nb_lecteurs> 0)
+        pthread_cond_wait(&lect_red->file_rect,&lect_red->mutex_global);
+
+    lect_red->bool_redacteur = 1;
+    pthread_mutex_unlock(&lect_red->mutex_global);
 }
- 
- void debut_lecteur()
-{
-    lock(global);
-    nb_lecteurs++;
-}   
+void fin_redaction(lecteur_redacteur_t *lect_red){
+    pthread_mutex_lock(&lect_red->mutex_global);
+    lect_red->nb_redacteurs--;
+    lect_red->bool_redacteur = 0;
 
-initialiser_lecteur_redacteur(lecteur_redacteur lect_red){
-    lect_red.nb_lecteurs = 0;
-    lect_red.nb_redacteurs = 0;
-    pthread_mutex_init(&lect_red.mutex_global,NULL);
+    if(lect_red->nb_redacteurs > 0)
+        pthread_cond_signal(&lect_red->file_rect);
+    else
+        pthread_cond_broadcast(&lect_red->file_lect);
+
+    pthread_mutex_unlock(&lect_red->mutex_global);
+
+}
+void debut_lecture(lecteur_redacteur_t *lect_red){
+    pthread_mutex_lock(&lect_red->mutex_global);
+
+    while(lect_red->nb_redacteurs > 0)
+        pthread_cond_wait(&lect_red->file_lect,&lect_red->mutex_global);
+
+    lect_red->nb_lecteurs++;
+    pthread_mutex_unlock(&lect_red->mutex_global);
 }
 
+void fin_lecture(lecteur_redacteur_t *lect_red){
+    pthread_mutex_lock(&lect_red->mutex_global);
+    lect_red->nb_lecteurs--;
+    if(lect_red->nb_lecteurs == 0)
+        pthread_cond_signal(&lect_red->file_rect);
+    pthread_mutex_unlock(&lect_red->mutex_global);
+}
+
+void initialiser_lecteur_redacteur(lecteur_redacteur_t *lect_red){
+    lect_red->nb_lecteurs = 0;
+    lect_red->nb_redacteurs = 0;
+    lect_red->bool_redacteur =0;
+    pthread_mutex_init(&lect_red->mutex_global,NULL);
+    pthread_cond_init(&lect_red->file_lect,NULL);
+    pthread_cond_init(&lect_red->file_rect,NULL);
+}
+
+void detruire_lecteur_redacteur(lecteur_redacteur_t *lect_red){
+    pthread_mutex_destroy(&lect_red->mutex_global);
+    pthread_cond_destroy(&lect_red->file_lect);
+    pthread_cond_destroy(&lect_red->file_rect);
+}
 
 void dodo(int scale) {
     usleep((random()%1000000)*scale);
@@ -47,7 +86,7 @@ void *lecteur(void *args) {
 
     for (i=0; i < d->iterations; i++) {
         dodo(2);
-	debut_lecture(&d->lecteur_redacteur);
+	       debut_lecture(&d->lecteur_redacteur);
         	printf("Thread %x : debut lecture\n", (int) pthread_self());
         	valeur = d->donnee;
         	dodo(1);
