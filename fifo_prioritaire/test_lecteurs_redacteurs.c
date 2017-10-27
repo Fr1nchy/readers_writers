@@ -3,17 +3,21 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+typedef enum{thread_lecteur,thread_redacteur} T_state;
+
 typedef struct{
-    pthread_t tid;
-    struct * next_maillon;
+    pthread_cond_t cond_thread;
+    T_state etat;
+    struct maillon_t * next_maillon;
 }maillon_t;
 
 typedef struct{
     pthread_mutex_t mutex_global;
     int nb_lecteurs;
     int nb_redacteurs;
-    maillon * tête;
-    maillon * queue;
+    int bool_redacteur;
+    maillon_t * tete;
+    maillon_t * queue;
 
 }lecteur_redacteur_t;
 
@@ -23,13 +27,27 @@ typedef struct {
     int donnee;
 } donnees_thread_t;
 
-void ajouter_Queue(pthread_t tid,lecteur_redacteur lect_red){
-    if(lect_red->queue !=NULL){
+void ajouter_queue(lecteur_redacteur_t * lect_red, T_state etat){
         maillon_t * new_maillon = malloc(sizeof(maillon_t));
-        new_maillon->tid = tid;
         new_maillon->next_maillon = NULL;
-        lect_red->queue->next_maillon = new_maillon;
-        lect_red->queue = new_maillon;
+        new_maillon->etat = etat;
+        pthread_cond_init(&new_maillon->cond_thread,NULL);
+
+        if(lect_red->tete == NULL){
+            lect_red->tete = new_maillon;
+            lect_red->queue = new_maillon;
+        }else{
+            lect_red->queue->next_maillon = new_maillon;
+            lect_red->queue = new_maillon;
+        }
+}
+
+void enlever_tete(lecteur_redacteur_t * lect_red){
+    if(lect_red->tete != NULL){
+        maillon_t * temp = lect_red->tete->next_maillon;
+        free(lect_red->tete);
+        lect_red->tete = temp;
+        free(temp);
     }
 }
 
@@ -41,15 +59,32 @@ void fin_redaction(lecteur_redacteur_t *lect_red){
 
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
-
+    pthread_mutex_lock(&lect_red->mutex_global);
+    while(lect_red->bool_redacteur){
+            ajouter_queue(lect_red,thread_lecteur);
+            pthread_cond_wait(&lect_red->queue->cond_thread,&lect_red->mutex_global);
+    }
+    lect_red->nb_lecteurs++;
+    pthread_mutex_unlock(&lect_red->mutex_global);
 }
 
 void fin_lecture(lecteur_redacteur_t *lect_red){
+    pthread_mutex_lock(&lect_red->mutex_global);
+    lect_red->nb_lecteurs--;
+    while( lect_red->tete != NULL && lect_red->tete->etat == thread_lecteur)
+            pthread_cond_signal(&lect_red->tete->cond_thread);
+            enlever_tete(lect_red);
 
+    pthread_mutex_unlock(&lect_red->mutex_global);
 }
 
 void initialiser_lecteur_redacteur(lecteur_redacteur_t *lect_red){
-
+    lect_red->tete = NULL;
+    lect_red->queue = NULL;
+    lect_red->nb_lecteurs = 0;
+    lect_red->nb_redacteurs = 0;
+    lect_red->bool_redacteur = 0;
+    pthread_mutex_init(&lect_red->mutex_global,NULL);
 }
 
 void detruire_lecteur_redacteur(lecteur_redacteur_t *lect_red){
