@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#ifdef DEBUG
+# define DEBUG_PRINT(x) printf x
+#else
+# define DEBUG_PRINT(x) do {} while (0)
+#endif
+
 typedef enum{thread_lecteur,thread_redacteur} T_state;
 
 typedef struct maillon_t{
@@ -50,15 +56,14 @@ void enlever_tete(lecteur_redacteur_t * lect_red){
 }
 
 void contenu_fifo(lecteur_redacteur_t * lect_red){
-    pthread_mutex_lock(&lect_red->mutex_fifo);
+
     maillon_t * maillon_courant = lect_red->tete;
-    printf("Contenu Fifo:");
+    DEBUG_PRINT(("\x1b[32m Contenu Fifo:\x1b[32m"));
     while(maillon_courant != NULL){
-            printf("%i ",maillon_courant->etat);
+            DEBUG_PRINT(("%i",maillon_courant->etat));
             maillon_courant = maillon_courant->next_maillon;
     }
-    printf("\n");
-    pthread_mutex_unlock(&lect_red->mutex_fifo);
+    DEBUG_PRINT(("\x1b[0m\n"));
 }
 
 void debut_redaction(lecteur_redacteur_t *lect_red){
