@@ -5,7 +5,7 @@
 
 typedef enum{thread_lecteur,thread_redacteur} T_state;
 
-typedef struct{
+typedef struct maillon_t{
     pthread_cond_t cond_thread;
     T_state etat;
     struct maillon_t * next_maillon;
@@ -14,7 +14,6 @@ typedef struct{
 typedef struct{
     pthread_mutex_t mutex_global;
     int nb_lecteurs;
-    int nb_redacteurs;
     int bool_redacteur;
     maillon_t * tete;
     maillon_t * queue;
@@ -47,33 +46,72 @@ void enlever_tete(lecteur_redacteur_t * lect_red){
         maillon_t * temp = lect_red->tete->next_maillon;
         free(lect_red->tete);
         lect_red->tete = temp;
-        free(temp);
     }
+}
+
+void contenu_fifo(lecteur_redacteur_t * lect_red){
+    pthread_mutex_lock(&lect_red->mutex_fifo);
+    maillon_t * maillon_courant = lect_red->tete;
+    printf("Contenu Fifo:");
+    while(maillon_courant != NULL){
+            printf("%i ",maillon_courant->etat);
+            maillon_courant = maillon_courant->next_maillon;
+    }
+    printf("\n");
+    pthread_mutex_unlock(&lect_red->mutex_fifo);
 }
 
 void debut_redaction(lecteur_redacteur_t *lect_red){
-
+    pthread_mutex_lock(&lect_red->mutex_global);
+        contenu_fifo(lect_red);
+    printf("Thread %x : Veux Ecrire \n", (int) pthread_self());
+    ajouter_queue(lect_red,thread_redacteur);
+    while(lect_red->bool_redacteur || lect_red->nb_lecteurs > 0){
+        printf("Thread %x : Est en attente \n", (int) pthread_self());
+        pthread_cond_wait(&lect_red->queue->cond_thread,&lect_red->mutex_global);
+    }
+    enlever_tete(lect_red);
+    lect_red->bool_redacteur = 1;
+    pthread_mutex_unlock(&lect_red->mutex_global);
 }
 void fin_redaction(lecteur_redacteur_t *lect_red){
+    pthread_mutex_lock(&lect_red->mutex_global);
+        contenu_fifo(lect_red);
+    lect_red->bool_redacteur = 0;
+    if(lect_red->tete != NULL && lect_red->tete->etat == thread_redacteur){
+        pthread_cond_signal(&lect_red->tete->cond_thread);
+    }else{
+        maillon_t * maillon_courant = lect_red->tete;
+        while(maillon_courant != NULL && maillon_courant->etat == thread_lecteur){
+                pthread_cond_signal(&maillon_courant->cond_thread);
+                maillon_courant = maillon_courant->next_maillon;
+        }
+    }
 
-
+    pthread_mutex_unlock(&lect_red->mutex_global);
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
-    while(lect_red->bool_redacteur){
-            ajouter_queue(lect_red,thread_lecteur);
+        contenu_fifo(lect_red);
+    printf("Thread %x : Veux lire \n", (int) pthread_self());
+    ajouter_queue(lect_red,thread_lecteur);
+    while(lect_red->bool_redacteur || (lect_red->tete != NULL && lect_red->tete->etat == thread_redacteur)){
+            printf("Thread %x : Est en attente \n", (int) pthread_self());
             pthread_cond_wait(&lect_red->queue->cond_thread,&lect_red->mutex_global);
     }
+    enlever_tete(lect_red);
     lect_red->nb_lecteurs++;
+
     pthread_mutex_unlock(&lect_red->mutex_global);
 }
 
 void fin_lecture(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
+        contenu_fifo(lect_red);
     lect_red->nb_lecteurs--;
-    while( lect_red->tete != NULL && lect_red->tete->etat == thread_lecteur)
+    if(lect_red->tete != NULL && lect_red->nb_lecteurs == 0 ){
             pthread_cond_signal(&lect_red->tete->cond_thread);
-            enlever_tete(lect_red);
+    }
 
     pthread_mutex_unlock(&lect_red->mutex_global);
 }
@@ -82,7 +120,6 @@ void initialiser_lecteur_redacteur(lecteur_redacteur_t *lect_red){
     lect_red->tete = NULL;
     lect_red->queue = NULL;
     lect_red->nb_lecteurs = 0;
-    lect_red->nb_redacteurs = 0;
     lect_red->bool_redacteur = 0;
     pthread_mutex_init(&lect_red->mutex_global,NULL);
 }
