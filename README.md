@@ -40,7 +40,7 @@ La fonction `void fin_redaction(lecteur_redacteur_t *lect_red)` est appelée par
   Pour cette solution la structure `lecteur_redacteur_t` est composée de plusieurs éléments:
   
   - Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
-  - Le sémaphore `sem_fichier`  sert à protéger l'accès à la ressource utilisée par chacun des threads. Il est initialisé à 1, il ne peut donc avoir qu'un thread dans la section critique. Ce sémaphore permet au premier lecteur de réserver la ressource pour les prochains lecteurs, pour permettre plusieurs lectures en concurrence.
+  - Le sémaphore `sem_fichier`  sert à protéger l'accès à la ressource utilisée par chacun des threads. Il est initialisé à 1, il ne peut donc avoir qu'un thread dans la section critique. Ce sémaphore permet au premier lecteur de réserver la ressource pour les prochains lecteurs, pour permettre plusieurs lectures en concurrence. On utilise une sémaphore plutôt qu'un thread pour que la ressource soit libéré par un thread différent de celui qu'il la vérouillé. En effet le premier lecteur réalise un `sem_wait` et le dernier lecteur un `sem_post`pour libérer la ressource. Si un mutex avait été utilisé le vérrou et la libération de la ressource aurait du être effectué par le même thread, ce qui est compliqué à mettre en place et pas très cohérent.
   - L'entier `nb_lecteurs` permet de compter le nombre de lecteurs en cours de lecture sur la ressource.
   
 Pour comprendre la solution et les mécanismes mis en place, voici un scénario d'éxecution:
