@@ -37,14 +37,22 @@ La fonction `void fin_redaction(lecteur_redacteur_t *lect_red)` est appellée pa
 ## 3. Détails d'implémentation 
   ### Lecteurs prioritaires
   
-  Pour cette solution la structure `lecteur_redacteur_t` est composée d'un mutex `mutex_global`, d'une sémaphore `sem_fichier`  et d'un entier `nb_lecteurs`.
-  - Le mutex sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
-  - La sémaphore sert à protéger l'accès à la ressource utiliser par chacun des threads. Elle est initialisé à un, il ne peut donc avoir qu'un thread dans la section critique. Cette sémaphore permet au premier lecteur de réservé la ressource pour les prochains lecteurs, pour permettre plusieurs lectures en concurence.
-  - L'entier permet de compter le nombre de lecteur en cours de lecture sur la ressource.
+  Pour cette solution la structure `lecteur_redacteur_t` est composée de plusieurs éléments:
   
+  - Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
+  - La sémaphore `sem_fichier`  sert à protéger l'accès à la ressource utiliser par chacun des threads. Elle est initialisé à un, il ne peut donc avoir qu'un thread dans la section critique. Cette sémaphore permet au premier lecteur de réservé la ressource pour les prochains lecteurs, pour permettre plusieurs lectures en concurence.
+  - L'entier `nb_lecteurs` permet de compter le nombre de lecteur en cours de lecture sur la ressource.
+  
+Pour comprendre la solution et les mécanismes mis en place, voici un sénario d'éxecution:
+
 Lorsque la ressouce est disponible, le nombre de lecteur est à zéro et qu'un thread lecteur appelle `debut_lecture` il va prendre le jeton de la sémaphore et réservé la ressources pour tout les lecteurs. Tout les threads lecteur vont pouvoir accèder à la ressource, alors que les threads rédacteur seront en attente pour prendre le jeton de la sémpharore. 
 La ressource est libéré par le dernier lecteur lorsque tout les threads ont terminés de lire. A ce moment la les threads rédacteurs en attente peuvent prendre le jeton sur la sémaphore.
+
+
+   ### Rédacteurs prioritaire
   
-  
+   Pour cette solution la structure `lecteur_redacteur_t` st composée de plusieurs éléments:
+     - Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
+   
   
   
