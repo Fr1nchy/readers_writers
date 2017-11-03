@@ -6,7 +6,7 @@
 #ifdef DEBUG
 # define DEBUG_PRINT(x) printf x
 #else
-# define DEBUG_PRINT(x) do {} while (0)
+# define DEBUG_PRINT(x)
 #endif
 
 typedef enum{thread_lecteur,thread_redacteur} T_state;
