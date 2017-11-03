@@ -49,12 +49,15 @@ Lorsque la ressouce est disponible, le nombre de lecteur est à zéro et qu'un t
 La ressource est libéré par le dernier lecteur lorsque tout les threads ont terminés de lire. A ce moment la les threads rédacteurs en attente peuvent prendre le jeton sur la sémaphore.
 
 
-   ### Rédacteurs prioritaire
+   ### Rédacteurs prioritaires
   
    Pour cette solution la structure `lecteur_redacteur_t` est composée de plusieurs éléments:
    
    - Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
-   
+   - Une variable condition `file_lect` représentant une liste d'attente pour les lecteurs 
+   - Une variable condition `file_rect` représentant une liste d'attente pour les redacteurs  
+   - L'entier `nb_lecteurs` et `nb_redacteurs` pour compter le nombre de lecteur ou de redacteur utilisant la ressource.
+   - Un boolléen `bool_redacteur` pour savoir si une rédaction est en court.
    
    ### Priorité FIFO
    
