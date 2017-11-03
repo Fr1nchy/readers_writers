@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include "lecteur_redacteur.h"
+
 
 typedef struct{
     pthread_mutex_t mutex_global;
@@ -23,9 +23,13 @@ void debut_redaction(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
     lect_red->nb_redacteurs++;
 
+    /*Les threads rédacteurs sont en attente sur la file_rect si il y'a des lecteurs
+    en court ou si il y'a un rédacteur utilisant la ressource*/
     while(lect_red->bool_redacteur || lect_red->nb_lecteurs> 0)
         pthread_cond_wait(&lect_red->file_rect,&lect_red->mutex_global);
 
+    /* Lorsque l'on prend la ressource on affecte un booléen à un pour que le autres rédacteur
+    ne puisse accèder à la ressource */
     lect_red->bool_redacteur = 1;
     pthread_mutex_unlock(&lect_red->mutex_global);
 }
@@ -34,8 +38,11 @@ void fin_redaction(lecteur_redacteur_t *lect_red){
     lect_red->nb_redacteurs--;
     lect_red->bool_redacteur = 0;
 
+    /*Si le nombre de redacteurs souhaitant accèder à la ressource est supérieur à zéro
+    alors on notifie les threads en attente sur la variable condition file_rect*/
     if(lect_red->nb_redacteurs > 0)
         pthread_cond_signal(&lect_red->file_rect);
+    /* Sinon on notifie tout les threads lecteurs en attente sur la file_lect*/
     else
         pthread_cond_broadcast(&lect_red->file_lect);
 
@@ -44,7 +51,9 @@ void fin_redaction(lecteur_redacteur_t *lect_red){
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
-
+    /* Tant qu'il a des rédacteurs, les lecteurs attendent sur la variable condition file_lect
+    si aucun rédacteur alors on incrémente sur le nombre de lecteur et la ressource est prise pour
+    tout les lecteurs*/
     while(lect_red->nb_redacteurs > 0)
         pthread_cond_wait(&lect_red->file_lect,&lect_red->mutex_global);
 
@@ -55,6 +64,8 @@ void debut_lecture(lecteur_redacteur_t *lect_red){
 void fin_lecture(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
     lect_red->nb_lecteurs--;
+    /* si le nombre de lecteur est à zéro, lorsque le dernier thread a fini de lire
+    alors on signal les threads rédacteurs en attente sur la variable condition file_rect*/
     if(lect_red->nb_lecteurs == 0)
         pthread_cond_signal(&lect_red->file_rect);
     pthread_mutex_unlock(&lect_red->mutex_global);

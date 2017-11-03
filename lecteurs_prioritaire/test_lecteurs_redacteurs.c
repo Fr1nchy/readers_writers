@@ -17,13 +17,18 @@ typedef struct {
 } donnees_thread_t;
 
 void debut_redaction(lecteur_redacteur_t *lect_red){
+    // Prend la ressource si le jeton est disponible sinon le rédacteur est en attente
     sem_wait(&lect_red->sem_fichier);
 }
+
 void fin_redaction(lecteur_redacteur_t *lect_red){
+    // Rédacteur rend le jeton sur la sémaphore pour qu'il puisse être utilisé par un autre thread
     sem_post(&lect_red->sem_fichier);
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
+    /* Si le nombre de lecteurs est à zéro alors le thread prend
+    le jeton de la sémaphore qui va réserver la ressource aux lecteurs */
     if(lect_red->nb_lecteurs == 0)
         sem_wait(&lect_red->sem_fichier);
 
@@ -35,6 +40,9 @@ void fin_lecture(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
     lect_red->nb_lecteurs--;
 
+    /*le dernier lecteur à lire va rendre le jeton de la sémaphore
+    pour rendre la ressource disponible. Un thread rédacteur ou lecteur pourra réservé
+    à nouveau la ressource */
     if(lect_red->nb_lecteurs == 0)
         sem_post(&lect_red->sem_fichier);
 
@@ -42,9 +50,9 @@ void fin_lecture(lecteur_redacteur_t *lect_red){
 }
 
 void initialiser_lecteur_redacteur(lecteur_redacteur_t *lect_red){
-    lect_red->nb_lecteurs = 0;
+    lect_red->nb_lecteurs = 0; // zéro lecteur au début du programme
     pthread_mutex_init(&lect_red->mutex_global,NULL);
-    sem_init(&lect_red->sem_fichier,0,1);
+    sem_init(&lect_red->sem_fichier,0,1); // Initialisation de la sémaphore à un, un seul thread peut prendre le vérrou
 }
 
 void detruire_lecteur_redacteur(lecteur_redacteur_t *lect_red){
