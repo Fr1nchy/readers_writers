@@ -56,7 +56,7 @@ La ressource est libéré par le dernier lecteur lorsque tout les threads ont te
    - Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
    
    
-   ## Priorité FIFO
+   ### Priorité FIFO
    
    Pour cette solution la structure `lecteur_redacteur_t` est composée de plusieurs éléments:
    
