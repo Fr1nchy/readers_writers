@@ -61,27 +61,26 @@ La ressource est libérée par le dernier lecteur lorsque tous les threads ont t
    
    ### Priorité FIFO
     
-+   Dans cette implémentation, une structure de donnée FIFO a été rajoutée, elle va permettre de modéliser une file d'attente pour les threads. Les threads passent selon leur ordre d’arrivée en permettant tout de même l’accès en parallèle à plusieurs lecteurs. Par exemple,l’ordre d’arrivée suivant : L1, L2, L3, R1, R2, L4, L5, R3 donnera l’ordre de passage suivant :
-+   
-+   - L1,L2,L3 en parallèle
-+   - R1 seul
-+   - R2 seul
-+   - L4,L5 en parallèle
-+   - R3 seul
-+     
+   Dans cette implémentation, une structure de donnée FIFO a été rajoutée, elle va permettre de modéliser une file d'attente pour les threads. Les threads passent selon leur ordre d’arrivée en permettant tout de même l’accès en parallèle à plusieurs lecteurs. Par exemple,l’ordre d’arrivée suivant : L1, L2, L3, R1, R2, L4, L5, R3 donnera l’ordre de passage suivant :
+   
+   - L1,L2,L3 en parallèle
+   - R1 seul
+   - R2 seul
+   - L4,L5 en parallèle
+   - R3 seul
+     
     Pour cette solution la structure `lecteur_redacteur_t` est composée de plusieurs éléments:
     
-+- Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
-+- L'entier `nb_lecteurs` permet de compter le nombre de lecteur en cours de lecture sur la ressource.
-+- Un boolléen `bool_redacteur` pour savoir si une rédaction est en court.
-+- Deux pointeurs `tete` et `queue` sur une structure `maillon_t`qui permettent de modéliser une liste FIFO. Chaque maillon de la file possède une variable condition `cond_thread`, un état indiquant le type lecteur ou redacteur, ainsi qu'un pointeur sur le maillon suivant pour chainer les maillons.
-+
-+   
+- Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
+- L'entier `nb_lecteurs` permet de compter le nombre de lecteur en cours de lecture sur la ressource.
+- Un boolléen `bool_redacteur` pour savoir si une rédaction est en court.
+- Deux pointeurs `tete` et `queue` sur une structure `maillon_t`qui permettent de modéliser une liste FIFO. Chaque maillon de la file possède une variable condition `cond_thread`, un état indiquant le type lecteur ou redacteur, ainsi qu'un pointeur sur le maillon suivant pour chainer les maillons.
+  
     
  ## 4. Compilation et éxecution du code 
  
-+  Pour compiler le code en version finale il suffit d'executer la commande `make.` Il est possible d'obtenir une execution du
-+  programme plus détaillée avec l'affichage du contenu de la FIFO pour la solution avec priorité selon l'odre d'arrivée. Pour ça il faut compiler avec la commande `make debug`.
-+  Pour chacune des solutions, une fois le programme compilé il peut être executé avec la commande et les arguments suivants `./test_lecteurs_redacteurs nb_lecteurs nb_redacteurs nb_iterations`
-+  
+ Pour compiler le code en version finale il suffit d'executer la commande `make.` Il est possible d'obtenir une execution du
+  programme plus détaillée avec l'affichage du contenu de la FIFO pour la solution avec priorité selon l'odre d'arrivée. Pour ça il faut compiler avec la commande `make debug`. L'affichage du contenu de la FIFO est un ensemble de 0 et de 1. Les 1, représentent les rédacteurs et les 0, les lecteurs en attente dans la file.
+  Pour chacune des solutions, une fois le programme compilé il peut être executé avec la commande et les arguments suivants `./test_lecteurs_redacteurs nb_lecteurs nb_redacteurs nb_iterations`
+  
  ## 5. Tests
