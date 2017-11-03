@@ -80,7 +80,7 @@ La ressource est libérée par le dernier lecteur lorsque tous les threads ont t
  ## 4. Compilation et éxecution du code 
  
  Pour compiler le code en version finale il suffit d'executer la commande `make.` Il est possible d'obtenir une execution du
-  programme plus détaillée avec l'affichage du contenu de la FIFO pour la solution avec priorité selon l'odre d'arrivée. Pour ça il faut compiler avec la commande `make debug`. L'affichage du contenu de la FIFO est un ensemble de 0 et de 1. Les 1, représentent les rédacteurs et les 0, les lecteurs en attente dans la file.
+  programme plus détaillée avec l'affichage du contenu de la FIFO pour la solution avec priorité selon l'odre d'arrivée. Pour ça il faut compiler avec la commande `make debug`. L'affichage du contenu de la FIFO est un ensemble de 0 et de 1. Les 1, représentent les rédacteurs et les 0, les lecteurs en attentent dans la file.
   Pour chacune des solutions, une fois le programme compilé il peut être executé avec la commande et les arguments suivants `./test_lecteurs_redacteurs nb_lecteurs nb_redacteurs nb_iterations`
   
  ## 5. Tests
