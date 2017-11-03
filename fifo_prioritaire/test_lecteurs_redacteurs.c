@@ -67,22 +67,36 @@ void contenu_fifo(lecteur_redacteur_t * lect_red){
 }
 
 void debut_redaction(lecteur_redacteur_t *lect_red){
+
     pthread_mutex_lock(&lect_red->mutex_global);
-        contenu_fifo(lect_red);
+    // Affiche le contenu de la fifo si compiler avec la macro Debug
+    contenu_fifo(lect_red);
     printf("Thread %x : Veux Ecrire \n", (int) pthread_self());
+    // ajoute le redacteur en queue de fifo
     ajouter_queue(lect_red,thread_redacteur);
+
+    /* Tant qu'un redacteur ou des lecteurs utilisent la ressources
+    le thread est en attente. Il revérifie cette condition au signal d'un
+    autre thread */
     while(lect_red->bool_redacteur || lect_red->nb_lecteurs > 0){
         printf("Thread %x : Est en attente \n", (int) pthread_self());
         pthread_cond_wait(&lect_red->queue->cond_thread,&lect_red->mutex_global);
     }
+    // Retire le thread de la fifo
     enlever_tete(lect_red);
+    // Le redacteur prend la ressource, booléen à 1
     lect_red->bool_redacteur = 1;
     pthread_mutex_unlock(&lect_red->mutex_global);
 }
 void fin_redaction(lecteur_redacteur_t *lect_red){
+
     pthread_mutex_lock(&lect_red->mutex_global);
-        contenu_fifo(lect_red);
+    // Affiche le contenu de la fifo si compiler avec la macro Debug
+    contenu_fifo(lect_red);
+    // Le redacteur relache la ressource, booléen à
     lect_red->bool_redacteur = 0;
+    /* Si le thread suivant est un redacteur on le réveil
+    sinon on réveille tout les threads lecteurs suivant*/
     if(lect_red->tete != NULL && lect_red->tete->etat == thread_redacteur){
         pthread_cond_signal(&lect_red->tete->cond_thread);
     }else{
@@ -96,24 +110,32 @@ void fin_redaction(lecteur_redacteur_t *lect_red){
     pthread_mutex_unlock(&lect_red->mutex_global);
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
+
     pthread_mutex_lock(&lect_red->mutex_global);
-        contenu_fifo(lect_red);
+    contenu_fifo(lect_red);
     printf("Thread %x : Veux lire \n", (int) pthread_self());
     ajouter_queue(lect_red,thread_lecteur);
+
+    /* Tant qu'un redacteur utilisent la ressourcesle thread est en attente.
+    Et si le premier élément de la fifo est un redacteur alors le lecteur est en attente
+    Il revérifie cette condition de boucle au signal d'un autre thread, lorsqu'il a relaché la ressource*/
     while(lect_red->bool_redacteur || (lect_red->tete != NULL && lect_red->tete->etat == thread_redacteur)){
             printf("Thread %x : Est en attente \n", (int) pthread_self());
             pthread_cond_wait(&lect_red->queue->cond_thread,&lect_red->mutex_global);
     }
+
     enlever_tete(lect_red);
     lect_red->nb_lecteurs++;
-
     pthread_mutex_unlock(&lect_red->mutex_global);
 }
 
 void fin_lecture(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
-        contenu_fifo(lect_red);
+    contenu_fifo(lect_red);
+
     lect_red->nb_lecteurs--;
+    /*Si la tête de la fifo n'est pas nulle et que le nombres de lecteur est à zéro
+    alors on notifie le thread en tête de fifo*/
     if(lect_red->tete != NULL && lect_red->nb_lecteurs == 0 ){
             pthread_cond_signal(&lect_red->tete->cond_thread);
     }
