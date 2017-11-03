@@ -25,11 +25,26 @@ Dans chacune des solutions proposées, vous retrouverez quatres fonctions princi
 la politique de gestion des priorités. Chacune d'elles prennent en paramètre un pointeur sur la structure `lecteur_redacteur_t`
 Ci-dessous les fonctions :
 
-La fonction `void debut_lecture(lecteur_redacteur_t *lect_red)` est appellé par un thread lecteur lorsqu'il souhaite accèder à
+La fonction `void debut_lecture(lecteur_redacteur_t *lect_red)` est appellée par un thread lecteur lorsqu'il souhaite accèder à
 une ressource en lecture. 
 
-La fonction `fin_lecture(lecteur_redacteur_t *lect_red)` est appellé par un thread lecteur lorsqu'il a terminé d'utiliser la ressource
+La fonction `void fin_lecture(lecteur_redacteur_t *lect_red)` est appellée par un thread lecteur lorsqu'il a terminé d'utiliser la ressource.  Après l'execution de cette fonction la ressource est disponible, elle peut être utilisée par un thread rédacteur ou plusieurs threads lecteurs
 
-La fonction `debut_redaction(lecteur_redacteur_t *lect_red)` est appellé par un thread redacteur lorsqu'il souhaite accèder à une 
-ressource en rédaction. De plus cette fonction garantie que seul le thread en cours de rédaction accèdera à la ressource. Dans le cas où un ou plusieurs threads utilisent déjà la ressource alors le thread redacteur appellant cette fonction est mis en attente jusqu'à que la ressource soit disponible.
-   
+La fonction `void debut_redaction(lecteur_redacteur_t *lect_red)` est appellée par un thread redacteur lorsqu'il souhaite accèder à une ressource en rédaction. De plus cette fonction garantie que seul le thread en cours de rédaction accèdera à la ressource. Dans le cas où un ou plusieurs threads utilisent déjà la ressource alors le thread redacteur appellant cette fonction est mis en attente jusqu'à que la ressource soit disponible.
+
+La fonction `void fin_redaction(lecteur_redacteur_t *lect_red)` est appellée par thread redacteur lorsqu'il a terminé d'utiliser la ressource. Après l'execution de cette fonction la ressource est disponible, elle peut être utilisée par un thread rédacteur ou plusieurs threads lecteurs.
+
+## 3. Détails d'implémentation 
+  ### Lecteurs prioritaires
+  
+  Pour cette solution la structure `lecteur_redacteur_t` est composée d'un mutex `mutex_global`, d'une sémaphore `sem_fichier`  et d'un entier `nb_lecteurs`.
+  - Le mutex sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
+  - La sémaphore sert à protéger l'accès à la ressource utiliser par chacun des threads. Elle est initialisé à un, il ne peut donc avoir qu'un thread dans la section critique. Cette sémaphore permet au premier lecteur de réservé la ressource pour les prochains lecteurs, pour permettre plusieurs lectures en concurence.
+  - L'entier permet de compter le nombre de lecteur en cours de lecture sur la ressource.
+  
+Lorsque la ressouce est disponible, le nombre de lecteur est à zéro et qu'un thread lecteur appelle `debut_lecture` il va prendre le jeton de la sémaphore et réservé la ressources pour tout les lecteurs. Tout les threads lecteur vont pouvoir accèder à la ressource, alors que les threads rédacteur seront en attente pour prendre le jeton de la sémpharore. 
+La ressource est libéré par le dernier lecteur lorsque tout les threads ont terminés de lire. A ce moment la les threads rédacteurs en attente peuvent prendre le jeton sur la sémaphore.
+  
+  
+  
+  
