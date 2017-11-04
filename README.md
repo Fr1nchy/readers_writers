@@ -89,7 +89,9 @@ La ressource est libérée par le dernier lecteur lorsque tous les threads ont t
  
   ### Lecteurs prioritaires
        
+<div align="center"><img src="prio_lect" alt="lecteurs prioritaires"></div>
       
-      Sur cet exemple, on observe que 4 acteurs arrivent au même moment de l'exécution : d'abord un lecteur, puis deux rédacteurs et à nouveau un lecteur. On peut remarquer que les deux rédacteurs passent après les deux lecteurs, même si le deuxième lecteur est arrivé en dernier. De plus, puisque les rédacteurs doivent de toute façon attendre que toutes les lectures soient terminées pour accéder à la ressource, le programme a été optimisé de façon à ce que les lectures soient faites en parallèle. Le deuxième rédacteur en revanche doit bel et bien attendre la fin de l'écriture précédente pour procéder à la sienne.
+&nbsp;&nbsp;&nbsp;Sur cet exemple, on observe que 4 acteurs arrivent au même moment de l'exécution : d'abord un lecteur, puis deux rédacteurs et à nouveau un lecteur. On peut remarquer que les deux rédacteurs passent après les deux lecteurs, même si le deuxième lecteur est arrivé en dernier. De plus, puisque les rédacteurs doivent de toute façon attendre que toutes les lectures soient terminées pour accéder à la ressource, le programme a été optimisé de façon à ce que les lectures soient faites en parallèle. Le deuxième rédacteur en revanche doit bel et bien attendre la fin de l'écriture précédente pour procéder à la sienne.
+
       
-      
+<div align="center"><img src="prio_red" alt="lecteurs prioritaires"></div>
