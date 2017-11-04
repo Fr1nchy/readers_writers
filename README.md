@@ -4,7 +4,9 @@
 <div align="center">Différentes solutions d'implémentation du problème de synchronisation des lecteurs-rédacteurs</div>
   
 
+
 <div align="center">BARROIS Florian - DUVERNEY Thomas</div>
+
 
 
 
