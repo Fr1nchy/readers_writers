@@ -113,7 +113,7 @@ void debut_lecture(lecteur_redacteur_t *lect_red){
 
     pthread_mutex_lock(&lect_red->mutex_global);
     contenu_fifo(lect_red);
-    printf("Thread %x : Veux lire \n", (int) pthread_self());
+    printf("Thread %x : Veut lire \n", (int) pthread_self());
     ajouter_queue(lect_red,thread_lecteur);
 
     /* Tant qu'un redacteur utilisent la ressourcesle thread est en attente.
