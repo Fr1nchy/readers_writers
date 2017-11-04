@@ -81,6 +81,15 @@ La ressource est libérée par le dernier lecteur lorsque tous les threads ont t
  
  Pour compiler le code en version finale il suffit d'executer la commande `make.` Il est possible d'obtenir une execution du
   programme plus détaillée avec l'affichage du contenu de la FIFO pour la solution avec priorité selon l'odre d'arrivée. Pour ça il faut compiler avec la commande `make debug`. L'affichage du contenu de la FIFO est un ensemble de 0 et de 1. Les 1, représente les rédacteurs et les 0, les lecteurs en attente dans la file.
-  Pour chacune des solutions, une fois le programme compilé il peut être executé avec la commande et les arguments suivants `./test_lecteurs_redacteurs nb_lecteurs nb_redacteurs nb_iterations`
+  Pour chacune des solutions, une fois le programme compilé il peut être executé avec la commande et les arguments suivants `./test_lecteurs_redacteurs nb_lecteurs nb_redacteurs nb_iterations`.
   
  ## 5. Tests
+ 
+ Pour une question de lisibilité, tous les tests décrits ici ont été réalisés en simulant 3 lecteurs et 3 rédacteurs, chacun effectuant une seule fois son action attitrée.
+ 
+  ### Lecteurs prioritaires
+       
+      
+      Sur cet exemple, on observe que 4 acteurs arrivent au même moment de l'exécution : d'abord un lecteur, puis deux rédacteurs et à nouveau un lecteur. On peut remarquer que les deux rédacteurs passent après les deux lecteurs, même si le deuxième lecteur est arrivé en dernier. De plus, puisque les rédacteurs doivent de toute façon attendre que toutes les lectures soient terminées pour accéder à la ressource, le programme a été optimisé de façon à ce que les lectures soient faites en parallèle. Le deuxième rédacteur en revanche doit bel et bien attendre la fin de l'écriture précédente pour procéder à la sienne.
+      
+      
