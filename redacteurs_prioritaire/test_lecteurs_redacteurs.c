@@ -20,6 +20,7 @@ typedef struct {
 } donnees_thread_t;
 
 void debut_redaction(lecteur_redacteur_t *lect_red){
+    printf("Arrivee du thread redacteur %x\n", (int) pthread_self());
     pthread_mutex_lock(&lect_red->mutex_global);
     lect_red->nb_redacteurs++;
 
@@ -50,6 +51,7 @@ void fin_redaction(lecteur_redacteur_t *lect_red){
 
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
+    printf("Arrivee du thread lecteur %x\n", (int) pthread_self());
     pthread_mutex_lock(&lect_red->mutex_global);
     /* Tant qu'il a des rédacteurs, les lecteurs attendent sur la variable condition file_lect
     si aucun rédacteur alors on incrémente sur le nombre de lecteur et la ressource est prise pour

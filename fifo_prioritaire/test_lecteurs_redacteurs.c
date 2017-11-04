@@ -71,7 +71,7 @@ void debut_redaction(lecteur_redacteur_t *lect_red){
     pthread_mutex_lock(&lect_red->mutex_global);
     // Affiche le contenu de la fifo si compiler avec la macro Debug
     contenu_fifo(lect_red);
-    printf("Thread %x : Veux Ecrire \n", (int) pthread_self());
+    printf("Thread %x : Veut Ecrire \n", (int) pthread_self());
     // ajoute le redacteur en queue de fifo
     ajouter_queue(lect_red,thread_redacteur);
 
