@@ -1,6 +1,6 @@
-<div align="center"><h1>Lecteurs - Rédacteurs<h1><br/></div>
+<div align="center"><h1>Lecteurs - Rédacteurs<h1></div>
 <div align="center">Différentes solutions d'implémentation du problème de synchronisation des lecteurs-rédacteurs</div>
-  
+<br/>
 
 
 <div align="center">BARROIS Florian - DUVERNEY Thomas</div>
