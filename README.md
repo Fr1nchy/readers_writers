@@ -1,7 +1,5 @@
-<div align="center"><h1>Lecteurs - Rédacteurs<h1></div>
-  
-  
-<div align="center">Différentes solutions d'implémentation du problème de synchronisation des lecteurs-rédacteurs</div>
+<div align="center"><h1>Lecteurs - Rédacteurs<h1><br/>
+align="center">Différentes solutions d'implémentation du problème de synchronisation des lecteurs-rédacteurs</div>
   
 
 
