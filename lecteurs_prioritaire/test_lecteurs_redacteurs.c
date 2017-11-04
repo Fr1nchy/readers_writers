@@ -17,6 +17,7 @@ typedef struct {
 } donnees_thread_t;
 
 void debut_redaction(lecteur_redacteur_t *lect_red){
+	printf("Arrivée du thread redacteur %x\n", (int) pthread_self());
     // Prend la ressource si le jeton est disponible sinon le rédacteur est en attente
     sem_wait(&lect_red->sem_fichier);
 }
@@ -26,6 +27,7 @@ void fin_redaction(lecteur_redacteur_t *lect_red){
     sem_post(&lect_red->sem_fichier);
 }
 void debut_lecture(lecteur_redacteur_t *lect_red){
+	printf("Arrivée du thread lecteur %x\n", (int) pthread_self());
     pthread_mutex_lock(&lect_red->mutex_global);
     /* Si le nombre de lecteurs est à zéro alors le thread prend
     le jeton de la sémaphore qui va réserver la ressource aux lecteurs */
