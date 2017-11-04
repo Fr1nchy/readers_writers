@@ -1,3 +1,5 @@
+<div align="center"> BARROIS Florian     DUVERNEY Thomas</div>
+
 # Lecteurs - Rédacteurs
 
 Différentes solutions d'implémentation du problème de synchronisation des lecteurs-rédacteurs 
@@ -105,4 +107,4 @@ Sur cet exemple, un lecteur demande à accéder à la ressource, suivi par deux 
 
 <div align="center"><img src="prio_fifo.png" alt="fifo" width="426" height="338"></div>
 <p>&nbsp;</p>
-Cet exemple illustre tous les cas pertinents concernant la logique FIFO : on remarque d'abord que l'ordre d'accès à la ressource est cohérent lorsqu'un rédacteur arrive avant un lecteur (le thread a07c9700 opère avant le thread a27cd700). Ensuite, on peut voir que c'est également le cas lorsque c'est un lecteur qui demande l'accès à la ressource avant un rédacteur (le thread a1fcc700 opère avant le thread a0fca700). De plus, puisque deux lecteurs sont arrivés consécutivement, le parallélisme des lectures a été permis (threads lecteurs a27cd700 et a1fcc700). Enfin, la priorité FIFO est également respectée lorsque la file contient deux rédacteur et, comme attendu, le deuxième attend la fin de l'utilisation de la ressource par le premier pour commencer.
+Cet exemple illustre tous les cas pertinents concernant la logique FIFO : on remarque d'abord que l'ordre d'accès à la ressource est cohérent lorsqu'un rédacteur arrive avant un lecteur (le thread a07c9700 opère avant le thread a27cd700). Ensuite, on peut voir que c'est également le cas lorsque c'est un lecteur qui demande l'accès à la ressource avant un rédacteur (le thread a1fcc700 opère avant le thread a0fca700). De plus, puisque deux lecteurs sont arrivés consécutivement, le parallélisme des lectures a été permis (threads lecteurs a27cd700 et a1fcc700). Enfin, la priorité FIFO est également respectée lorsque la file contient deux rédacteurs et, comme attendu, le deuxième attend la fin de l'utilisation de la ressource par le premier pour commencer.
