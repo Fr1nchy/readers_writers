@@ -92,13 +92,13 @@ La ressource est libérée par le dernier lecteur lorsque tous les threads ont t
 <div align="center"><img src="prio_red.png" alt="lecteurs prioritaires" width="433" height="183"></div>
 <p>&nbsp;</p>
 Sur cet exemple, on observe que 4 acteurs arrivent au même moment de l'exécution : d'abord un lecteur, puis deux rédacteurs et à nouveau un lecteur. On peut remarquer que les deux rédacteurs passent après les deux lecteurs, même si le deuxième lecteur est arrivé en dernier. De plus, puisque les rédacteurs doivent de toute façon attendre que toutes les lectures soient terminées pour accéder à la ressource, le programme a été optimisé de façon à ce que les lectures soient faites en parallèle. Le deuxième rédacteur en revanche doit bel et bien attendre la fin de l'écriture précédente pour procéder à la sienne.
-
+<p>&nbsp;</p>
 ### Rédacteurs prioritaires    
     
 <div align="center"><img src="prio_red.png" alt="redacteurs prioritaires" width="444" height="184"></div>
 <p>&nbsp;</p>
 Sur cet exemple, un lecteur demande à accéder à la ressource, suivi par deux rédacteurs. Cette fois, ce sont les rédacteurs qui sont prioritaires et qui utilisent la ressource avant le lecteur bien que ce dernier en ait demandé l'accès en premier. Les rédactions ont lieu tour à tour en attendant bien que le rédacteur précédent ait terminé pour commencer leur travail. Tout comme pour le cas où les lecteurs sont prioritaires, plusieurs lecteurs peuvent utiliser la ressource parallèlement (tant qu'il n'y a pas de rédacteur en attente).
-
+<p>&nbsp;</p>
 ### First In First Out (FIFO)
 
 <div align="center"><img src="prio_fifo.png" alt="fifo" width="426" height="338"></div>
