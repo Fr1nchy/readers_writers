@@ -76,14 +76,20 @@ La ressource est libérée par le dernier lecteur lorsque tous les threads ont t
    - L4,L5 en parallèle
    - R3 seul
      
-    Pour cette solution la structure `lecteur_redacteur_t` est composée de plusieurs éléments:
+   Pour cette solution la structure `lecteur_redacteur_t` est composée de plusieurs éléments:
     
 - Le mutex `mutex_global` sert à protéger les variables globales manipulées dans les fonctions citées précédement. Il est utilisé à chaque début de fonction.
 - L'entier `nb_lecteurs` permet de compter le nombre de lecteur en cours de lecture sur la ressource.
-- Un boolléen `bool_redacteur` pour savoir si une rédaction est en court.
+- Un boolléen `bool_redacteur` pour savoir si une rédaction est en cours.
 - Deux pointeurs `tete` et `queue` sur une structure `maillon_t`qui permettent de modéliser une liste FIFO. Chaque maillon de la file possède une variable condition `cond_thread`, un état indiquant le type lecteur ou redacteur, ainsi qu'un pointeur sur le maillon suivant pour chainer les maillons.
-  
-    
+
+Pour comprendre la solution et les mécanismes mis en place, voici le scénario d'éxecution de l'exemple donné précédement:
+
+Les trois lecteurs L1,L2,L3 execute la fonction `debut_lecture`, ils vont tous être ajouté à la liste chainée selon leur ordre d'arrivé. Ensuite chaque lecteur va venir vérifier grâce à la condition du while si un rédacteur n'utilise pas la ressource ou si un rédacteur n'est pas dans la FIFO. Si l'une des deux conditions est validée alors le lecteur sera mis en attente jusqu'à la reception d'un signal envoyé par un autre thread. Dans le cas contraire, aucune condition n'interdit au lecteur d'utiliser la ressource, le lecteur sort de la FIFO et le nombre de lecteur est incrémenté. Nos trois lecteurs peuvent donc utliser la ressource. 
+Lorsque le rédacteur R1 appelle la fonction `debut_redaction`, le fonctionnement est le même qu'avec les lecteurs, seule la condition d'attente qui est différente. Il est donc ajouté à la FIFO et il vérifie si aucun rédacteur est en cours d'écriture ou si aucun lecteur utilise la ressource, dans le cas contraire il est en attente. R1 sera donc en attente jusqu'à ce les threads L1,L2,L3 est terminés leur lecture, et qu'un des trois lui envoi un signal pour revérifier la condition d'attente.
+Par la suite L4 arrive, il vérifié la condtion et passe en attente car il y'a un thread rédacteur en attente dans la FIFO.
+
+
  ## 4. Compilation et éxecution du code 
  
  Pour compiler le code en version finale il suffit d'executer la commande `make.` Il est possible d'obtenir une execution du
